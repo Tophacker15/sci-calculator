@@ -82,6 +82,12 @@ def safe_eval(expression, angle_mode="deg"):
     tree = ast.parse(expression, mode="eval")
     return _eval(tree, angle_mode)
 
+import re
+
+def preprocess_percent(expr):
+    return re.sub(r"(\d+(?:\.\d+)?)%(?![\w(.])", r"(\1/100)", expr)
+
+
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
@@ -102,6 +108,7 @@ class handler(BaseHTTPRequestHandler):
                 .replace("÷", "/")
                 .replace("−", "-")
             )
+            cleaned = preprocess_percent(cleaned)
 
             result = safe_eval(cleaned, angle_mode)
 
