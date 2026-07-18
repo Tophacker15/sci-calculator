@@ -90,7 +90,16 @@ export default function App() {
 
   function insert(value) {
     setError("");
-    setExpr((e) => e + value);
+    setExpr((e) => {
+      if (!e) return value;
+      const prevChar = e[e.length - 1];
+      const prevEndsOperand = /[\d).!]/.test(prevChar) || e.endsWith("pi") || prevChar === "e";
+      const nextStartsNewOperand = value === "(" || value === "pi" || value === "e" || /^[a-z]+\($/.test(value);
+      const nextIsDigitOrDot = /^[\d.]$/.test(value);
+      const isDigitContinuation = nextIsDigitOrDot && /[\d.]/.test(prevChar);
+      const needsMult = prevEndsOperand && !isDigitContinuation && (nextStartsNewOperand || nextIsDigitOrDot);
+      return needsMult ? e + "*" + value : e + value;
+    });
   }
 
   function handleClear() {
@@ -177,7 +186,7 @@ export default function App() {
           </div>
         </div>
 
-        <footer>Powered by Topboy Innovation — evaluated server-side in Python</footer>
+        <footer>Powered by Topboy Innovation</footer>
       </div>
     </>
   );
